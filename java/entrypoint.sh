@@ -59,7 +59,7 @@ mkdir -p dumps
                 
                 timestamp=$(date +"%d.%m.%y-%H:%M")
                 
-                gif_output="dumps/output/${basefilename}-${timestamp}.gif"
+                gif_output="output/${basefilename}-${timestamp}.gif"
                 
                 mkdir -p "$(dirname "$gif_output")"
                 
