@@ -26,7 +26,8 @@ jobs:
             fail-fast: false
             matrix:
                 tag:
-                    - 21 # Java 21 only for now
+                    - 21
+                    - 17
         
         steps:
             - name: Checkout
