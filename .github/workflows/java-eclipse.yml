@@ -54,4 +54,4 @@ jobs:
                 platforms: linux/amd64,linux/arm64
                 file: ./java/${{ matrix.tag }}/Dockerfile
                 push: true
-                tags: ghcr.io/Skullians/native-leak-profiling:java_${{ matrix.tag }}
+                tags: ghcr.io/skullians/native-leak-profiling:java_${{ matrix.tag }}
