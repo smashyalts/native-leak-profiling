@@ -15,6 +15,9 @@ By default, Jemalloc is configured to make dumps every 2GiB of memory allocation
 However, the Docker images will automatically remove these and convert them into readable GIFs, each of which are around 200-300KiB. Plan accordingly for increased storage usage if you plan to run it for a long time.\
 You can then analyze these GIFs once created - you will have a lot to go through - (see https://github.com/jeffgriffith/native-jvm-leaks/blob/master/README.md)
 
+Don't get me wrong - this isn't as easy as it sounds - these Jemalloc dumps and Jeprof GIFs **will not tell you what is causing the native leak directly**. For example, we had a chat plugin that didn't close zip inflators, which caused our leak. We only knew it was this plugin when we removed the plugin.\
+Chances are, you'll have to do something similar, which may prove difficult - ideally try to check src core of plugins / mods, although this may prove difficult for paid resources.
+
 ## Why?
 I started working on a Jemalloc native memory profiling image once encountered significant native memory leaks on our Velocity proxy.
 
