@@ -15,5 +15,17 @@ By default, Jemalloc is configured to make dumps every 2GiB of memory allocation
 However, the Docker images will automatically remove these and convert them into readable GIFs, each of which are around 200-300KiB. Plan accordingly for increased storage usage if you plan to run it for a long time.\
 You can then analyze these GIFs once created - you will have a lot to go through - (see https://github.com/jeffgriffith/native-jvm-leaks/blob/master/README.md)
 
+## Why?
+I started working on a Jemalloc native memory profiling image once encountered significant native memory leaks on our Velocity proxy.
+
+At some points we were hitting 40gb heap usage.
+
+As a result, we had to move out of Pterodactyl + Docker, and run our proxies in SSH temporarily with Jemalloc enabled to profile the leak...
+This is because you must supply jeprof with the java binary used to make the dumps, so people can't SSH in manually and run jeprof there, otherwise you get an output GIF that is a garbled mess.
+
+In our case, it was a native leak as a result of ZIP inflators not being AutoCloseable - one of our plugins made use of these for regular plugin messages, resulting in a very quick native leak.
+
+I wanted to plan for the future, in case I experienced a similar issue, thus here we are.
+
 ## Acknowledgements
 These are adapted Dockerfiles and entrypoints from [pterodactyl/yolks](https://github.com/pterodactyl/yolks/tree/master/java).
