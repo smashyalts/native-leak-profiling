@@ -18,6 +18,9 @@ You can then analyze these GIFs once created - you will have a lot to go through
 Don't get me wrong - this isn't as easy as it sounds - these Jemalloc dumps and Jeprof GIFs **will not tell you what is causing the native leak directly**. For example, we had a chat plugin that didn't close zip inflators, which caused our leak. We only knew it was this plugin when we removed the plugin.\
 Chances are, you'll have to do something similar, which may prove difficult - ideally try to check src core of plugins / mods, although this may prove difficult for paid resources.
 
+### Key points for reading generated GIFs
+- Data points that link to `je_malloc_default` **without** passibg through `os#malloc` will likely be a native memory leak. These data points do not pass directly through the JVM collector thus cannot be GC'd.
+
 ## Why?
 I started working on a Jemalloc native memory profiling image once encountered significant native memory leaks on our Velocity proxy.
 
