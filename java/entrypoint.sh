@@ -109,6 +109,8 @@ mkdir -p dumps
                         done
                     fi
                 done
+
+                sleep 120
             done
         fi
     fi
