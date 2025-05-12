@@ -80,7 +80,7 @@ mkdir -p dumps
 (
     sleep 60
     PID=$(pgrep java)
-    INPUT_FILE="dumps/jvm.log"
+    INPUT_FILE="jvm.log"
     OUTPUT_FILE="dumps/matches.log"
     KEYWORD=$(echo "$PARSED" | sed -n 's/.*-Dkeyword=\([^ ]*\).*/\1/p')
     ENABLED=$(echo "$PARSED" | sed -n 's/.*-Danalyse=\([^ ]*\).*/\1/p')
