@@ -90,20 +90,21 @@ mkdir -p dumps
             printf "No Java process found\n"
         else
             printf "Java process PID: $PID. Starting thread dumps.\n"
-            
+            printf "Checking for keyword ${KEYWORD}"
+
             while true; do
                 kill -3 ${PID}
                 
                 tail -f "$INPUT_FILE" | while read -r line; do
-                    if echo "$line" | grep -q "$KEYWORD"; then
-                        echo "Found matching trace at $(date)" >> "$OUTPUT_FILE"
-                        echo "$line" >> "$OUTPUT_FILE"
-                        echo "---" >> "$OUTPUT_FILE"
+                    if printf "$line" | grep -q "$KEYWORD"; then
+                        printf "Found matching trace at $(date)" >> "$OUTPUT_FILE"
+                        printf "$line" >> "$OUTPUT_FILE"
+                        printf "---" >> "$OUTPUT_FILE"
                     fi
                 done
+
+                sleep 120
             done
-            
-            sleep 120
         fi
     fi
 ) &
