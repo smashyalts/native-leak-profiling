@@ -41,6 +41,7 @@ java -version
 # variable format of "${VARIABLE}" before evaluating the string and automatically
 # replacing the values.
 PARSED=$(echo "${STARTUP}" | sed -e 's/{{/${/g' -e 's/}}/}/g' | eval echo "$(cat -)")
+TRACE_ENABLED=$(echo "$PARSED" | sed -n 's/.*-Danalyse=\([^ ]*\).*/\1/p')
 
 # Display the command we're running in the output, and then execute it with the env
 # from the container itself.
@@ -76,6 +77,30 @@ mkdir -p dumps
         sleep 60
     done
 ) &
+
+if [ "$TRACE_ENABLED" = "true" ]; then
+    # Extract the keyword from the PARSED variable
+    KEYWORD=$(echo "$PARSED" | sed -n 's/.*-Dkeyword=\([^ ]*\).*/\1/p')
+
+    (
+        mkdir -p dumps/traces
+
+        while true; do
+            JVM_LOG="jvm.log"
+
+            if [ -f "$JVM_LOG" ]; then
+                timestamp=$(date +"%d.%m.%y-%H:%M")
+                TRACE_OUTPUT="dumps/traces/trace-${timestamp}.log"
+
+                grep -E "$KEYWORD" "$JVM_LOG" > "$TRACE_OUTPUT"
+
+                > "$JVM_LOG"
+            fi
+
+            sleep 120
+        done
+    ) &
+fi
 
 # shellcheck disable=SC2086
 exec env ${PARSED}
