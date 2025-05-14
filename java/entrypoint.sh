@@ -77,37 +77,5 @@ mkdir -p dumps
     done
 ) &
 
-(
-    sleep 60
-    PID=$(pgrep java)
-    INPUT_FILE="jvm.log"
-    OUTPUT_FILE="dumps/matches.log"
-    KEYWORD=$(echo "$PARSED" | sed -n 's/.*-Dkeyword=\([^ ]*\).*/\1/p')
-    ENABLED=$(echo "$PARSED" | sed -n 's/.*-Danalyse=\([^ ]*\).*/\1/p')
-    
-    if [ "${ENABLED}" = "true" ]; then
-        if [ -z "$PID" ]; then
-            printf "No Java process found\n"
-        else
-            printf "Java process PID: $PID. Starting thread dumps.\n"
-            printf "Checking for keyword ${KEYWORD}"
-
-            while true; do
-                kill -3 ${PID}
-                
-                tail -f "$INPUT_FILE" | while read -r line; do
-                    if printf "$line" | grep -q "$KEYWORD"; then
-                        printf "Found matching trace at $(date)" >> "$OUTPUT_FILE"
-                        printf "$line" >> "$OUTPUT_FILE"
-                        printf "---" >> "$OUTPUT_FILE"
-                    fi
-                done
-
-                sleep 120
-            done
-        fi
-    fi
-) &
-
 # shellcheck disable=SC2086
 exec env ${PARSED}
