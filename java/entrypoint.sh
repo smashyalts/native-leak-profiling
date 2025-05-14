@@ -100,7 +100,12 @@ if [ "$TRACE_ENABLED" = "true" ]; then
                 timestamp=$(date +"%d.%m.%y-%H:%M")
                 TRACE_OUTPUT="dumps/traces/trace-${timestamp}.log"
 
-                grep -E "$KEYWORD" "$JVM_LOG" > "$TRACE_OUTPUT"
+                if grep -qE "$KEYWORD" "$JVM_LOG"; then
+                    cat "$JVM_LOG" > "$TRACE_OUTPUT"
+
+                    echo "Detected keyword ($KEYWORD):" >> "$TRACE_OUTPUT"
+                    grep -E "$KEYWORD" "$JVM_LOG" >> "$TRACE_OUTPUT"
+                fi
 
                 sleep 5
 
