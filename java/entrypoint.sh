@@ -102,6 +102,8 @@ if [ "$TRACE_ENABLED" = "true" ]; then
 
                 grep -E "$KEYWORD" "$JVM_LOG" > "$TRACE_OUTPUT"
 
+                sleep 5
+
                 > "$JVM_LOG"
             fi
         done
