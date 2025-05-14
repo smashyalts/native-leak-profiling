@@ -82,6 +82,13 @@ if [ "$TRACE_ENABLED" = "true" ]; then
     # Extract the keyword from the PARSED variable
     KEYWORD=$(echo "$PARSED" | sed -n 's/.*-Dkeyword=\([^ ]*\).*/\1/p')
 
+    if [ -z "$KEYWORD" ]; then
+        printf "KEYWORD is empty. Ensure -Dkeyword is set."
+        exit 1
+    fi
+
+    printf "Searching for keyword $KEYWORD"
+
     (
         mkdir -p dumps/traces
 
@@ -103,7 +110,7 @@ if [ "$TRACE_ENABLED" = "true" ]; then
                 if grep -qE "$KEYWORD" "$JVM_LOG"; then
                     cat "$JVM_LOG" > "$TRACE_OUTPUT"
 
-                    echo "Detected keyword ($KEYWORD):" >> "$TRACE_OUTPUT"
+                    printf "Detected keyword ($KEYWORD):" >> "$TRACE_OUTPUT"
                     grep -E "$KEYWORD" "$JVM_LOG" >> "$TRACE_OUTPUT"
                 fi
 
