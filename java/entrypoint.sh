@@ -81,7 +81,6 @@ mkdir -p dumps
 if [ "$TRACE_ENABLED" = "true" ]; then
     # Extract the keyword from the PARSED variable
     KEYWORD=$(echo "$PARSED" | sed -n 's/.*-Dkeyword=\([^ ]*\).*/\1/p')
-    PID=$(pgrep java)
 
     (
         mkdir -p dumps/traces
@@ -89,6 +88,7 @@ if [ "$TRACE_ENABLED" = "true" ]; then
         while true; do
             sleep 120
 
+            PID=$(pgrep java)
             kill -3 ${PID}
 
             # give it a moment to dump
