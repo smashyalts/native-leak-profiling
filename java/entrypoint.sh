@@ -81,9 +81,14 @@ mkdir -p dumps
 if [ "$TRACE_ENABLED" = "true" ]; then
     # Extract the keyword from the PARSED variable
     KEYWORD=$(echo "$PARSED" | sed -n 's/.*-Dkeyword=\([^ ]*\).*/\1/p')
+    INTERVAL=$(echo "$PARSED" | sed -n 's/.*-Dinterval=\([^ ]*\).*/\1/p')
 
     if [ -z "$KEYWORD" ]; then
         printf "KEYWORD is empty. Ensure -Dkeyword is set."
+        exit 1
+    fi
+    if [ -z "$INTERVAL" ]; then
+        printf "INTERVAL is empty. Ensure -Dinterval is set. (In seconds)"
         exit 1
     fi
 
@@ -93,7 +98,7 @@ if [ "$TRACE_ENABLED" = "true" ]; then
         mkdir -p dumps/traces
 
         while true; do
-            sleep 120
+            sleep $INTERVAL
 
             PID=$(pgrep java)
             kill -3 ${PID}
