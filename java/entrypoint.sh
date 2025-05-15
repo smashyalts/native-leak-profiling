@@ -121,7 +121,7 @@ if [ "$TRACE_ENABLED" = "true" ]; then
 
                 sleep 5
 
-                > "$JVM_LOG"
+                rm -f "$JVM_LOG"
             fi
         done
     ) &
