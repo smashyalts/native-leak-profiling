@@ -64,7 +64,7 @@ mkdir -p dumps
                 
                 mkdir -p "$(dirname "$gif_output")"
                 
-                jeprof --show_bytes --gif \
+                jeprof --show_bytes --maxdegree=20 --nodefraction=0 --edgefraction=0 --gif \
                     /opt/java/openjdk/bin/java \
                     "$heapfile" > "$gif_output"
                 
