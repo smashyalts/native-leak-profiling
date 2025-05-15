@@ -19,7 +19,7 @@ concurrency:
 jobs:
     push:
         name: "java_${{ matrix.tag }}"
-        runs-on: self-hosted
+        runs-on: ubuntu-latest
         strategy:
             fail-fast: false
             matrix:
