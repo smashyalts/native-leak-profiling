@@ -24,6 +24,7 @@ jobs:
             fail-fast: false
             matrix:
                 tag:
+                    - 24
                     - 21
                     - 17
                     - 11

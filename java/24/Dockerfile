@@ -56,8 +56,7 @@ RUN git clone https://github.com/jemalloc/jemalloc.git && \
     make && \
     make install
 
-# Adapted from https://github.com/pterodactyl/yolks/blob/master/java/21/Dockerfile
-FROM --platform=$TARGETOS/$TARGETARCH eclipse-temurin:21-jdk
+FROM --platform=$TARGETOS/$TARGETARCH eclipse-temurin:24-jdk
 
 LABEL       author="Matthew Penner" maintainer="matthew@pterodactyl.io"
 
