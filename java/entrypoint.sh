@@ -106,18 +106,18 @@ if [ "$TRACE_ENABLED" = "true" ]; then
             # give it a moment to dump
             sleep 5 
 
-            if echo "$CMD_OUTPUT" | grep -qE "$KEYWORD"; then
+            if echo "$OUTPUT" | grep -qE "$KEYWORD"; then
                 timestamp=$(date +"%d.%m.%y-%H:%M")
                 TRACE_OUTPUT="dumps/traces/trace-${timestamp}.log"
                 
                 printf "Keyword ($KEYWORD) detected. Saving output to $TRACE_OUTPUT\n"
                 
                 # Save the complete command output to the file
-                echo "$CMD_OUTPUT" > "$TRACE_OUTPUT"
+                echo "$OUTPUT" > "$TRACE_OUTPUT"
 
                 # Append the specific lines containing the keyword to the file
                 printf "\nDetected keyword ($KEYWORD):\n" >> "$TRACE_OUTPUT"
-                echo "$CMD_OUTPUT" | grep -E "$KEYWORD" >> "$TRACE_OUTPUT"
+                echo "$OUTPUT" | grep -E "$KEYWORD" >> "$TRACE_OUTPUT"
             fi
         done
     ) &
