@@ -84,11 +84,11 @@ if [ "$TRACE_ENABLED" = "true" ]; then
     INTERVAL=$(echo "$PARSED" | sed -n 's/.*-Dinterval=\([^ ]*\).*/\1/p')
 
     if [ -z "$KEYWORD" ]; then
-        printf "KEYWORD is empty. Ensure -Dkeyword is set.\n"
+        printf "KEYWORD is empty. Ensure -Dkeyword is set."
         exit 1
     fi
     if [ -z "$INTERVAL" ]; then
-        printf "INTERVAL is empty. Ensure -Dinterval is set. (In seconds)\n"
+        printf "INTERVAL is empty. Ensure -Dinterval is set. (In seconds)"
         exit 1
     fi
 
@@ -101,23 +101,27 @@ if [ "$TRACE_ENABLED" = "true" ]; then
             sleep $INTERVAL
 
             PID=$(pgrep java)
-            OUTPUT=$(jcmd ${PID} VM.native_memory detail)
+            kill -3 ${PID}
 
             # give it a moment to dump
             sleep 5 
 
-            if echo "$OUTPUT" | grep -qE "$KEYWORD"; then
+            JVM_LOG="jvm.log"
+
+            if [ -f "$JVM_LOG" ]; then
                 timestamp=$(date +"%d.%m.%y-%H:%M")
                 TRACE_OUTPUT="dumps/traces/trace-${timestamp}.log"
-                
-                printf "Keyword ($KEYWORD) detected. Saving output to $TRACE_OUTPUT\n"
-                
-                # Save the complete command output to the file
-                echo "$OUTPUT" > "$TRACE_OUTPUT"
 
-                # Append the specific lines containing the keyword to the file
-                printf "\nDetected keyword ($KEYWORD):\n" >> "$TRACE_OUTPUT"
-                echo "$OUTPUT" | grep -E "$KEYWORD" >> "$TRACE_OUTPUT"
+                if grep -qE "$KEYWORD" "$JVM_LOG"; then
+                    cat "$JVM_LOG" > "$TRACE_OUTPUT"
+
+                    printf "Detected keyword ($KEYWORD):" >> "$TRACE_OUTPUT\n"
+                    grep -E "$KEYWORD" "$JVM_LOG" >> "$TRACE_OUTPUT"
+                fi
+
+                sleep 5
+
+                rm -f "$JVM_LOG"
             fi
         done
     ) &
