@@ -84,15 +84,15 @@ if [ "$TRACE_ENABLED" = "true" ]; then
     INTERVAL=$(echo "$PARSED" | sed -n 's/.*-Dinterval=\([^ ]*\).*/\1/p')
 
     if [ -z "$KEYWORD" ]; then
-        printf "KEYWORD is empty. Ensure -Dkeyword is set."
+        printf "KEYWORD is empty. Ensure -Dkeyword is set.\n"
         exit 1
     fi
     if [ -z "$INTERVAL" ]; then
-        printf "INTERVAL is empty. Ensure -Dinterval is set. (In seconds)"
+        printf "INTERVAL is empty. Ensure -Dinterval is set. (In seconds)\n"
         exit 1
     fi
 
-    printf "Searching for keyword $KEYWORD"
+    printf "Searching for keyword $KEYWORD\n"
 
     (
         mkdir -p dumps/traces
