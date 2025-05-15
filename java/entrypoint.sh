@@ -115,7 +115,7 @@ if [ "$TRACE_ENABLED" = "true" ]; then
                 if grep -qE "$KEYWORD" "$JVM_LOG"; then
                     cat "$JVM_LOG" > "$TRACE_OUTPUT"
 
-                    printf "Detected keyword ($KEYWORD):" >> "$TRACE_OUTPUT\n"
+                    printf "Detected keyword ($KEYWORD):" >> "$TRACE_OUTPUT"
                     grep -E "$KEYWORD" "$JVM_LOG" >> "$TRACE_OUTPUT"
                 fi
 
