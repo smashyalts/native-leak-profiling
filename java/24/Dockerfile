@@ -75,7 +75,7 @@ USER container
 ENV USER=container \
     HOME=/home/container \
     LD_PRELOAD="/usr/local/lib/libjemalloc.so" \
-    MALLOC_CONF="prof:true,lg_prof_interval:31,lg_prof_sample:17,prof_prefix:/home/container/dumps/jeprof,background_thread:true,dirty_decay_ms:1000,muzzy_decay_ms:0,narenas:1,tcache_max:1024,abort_conf:true,opt.nodrop:true,opt.drop_cache:false"
+    MALLOC_CONF="prof:true,lg_prof_interval:31,lg_prof_sample:17,prof_prefix:/home/container/dumps/jeprof,background_thread:true,dirty_decay_ms:1000,muzzy_decay_ms:0,narenas:1,tcache_max:1024,abort_conf:true"
 
 WORKDIR /home/container/
 
