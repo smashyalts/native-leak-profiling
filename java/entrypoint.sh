@@ -101,27 +101,23 @@ if [ "$TRACE_ENABLED" = "true" ]; then
             sleep $INTERVAL
 
             PID=$(pgrep java)
-            kill -3 ${PID}
+            OUTPUT=$(jcmd ${PID} VM.native_memory detail)
 
             # give it a moment to dump
             sleep 5 
 
-            JVM_LOG="jvm.log"
-
-            if [ -f "$JVM_LOG" ]; then
+            if echo "$CMD_OUTPUT" | grep -qE "$KEYWORD"; then
                 timestamp=$(date +"%d.%m.%y-%H:%M")
                 TRACE_OUTPUT="dumps/traces/trace-${timestamp}.log"
+                
+                printf "Keyword ($KEYWORD) detected. Saving output to $TRACE_OUTPUT\n"
+                
+                # Save the complete command output to the file
+                echo "$CMD_OUTPUT" > "$TRACE_OUTPUT"
 
-                if grep -qE "$KEYWORD" "$JVM_LOG"; then
-                    cat "$JVM_LOG" > "$TRACE_OUTPUT"
-
-                    printf "Detected keyword ($KEYWORD):" >> "$TRACE_OUTPUT"
-                    grep -E "$KEYWORD" "$JVM_LOG" >> "$TRACE_OUTPUT"
-                fi
-
-                sleep 5
-
-                rm -f "$JVM_LOG"
+                # Append the specific lines containing the keyword to the file
+                printf "\nDetected keyword ($KEYWORD):\n" >> "$TRACE_OUTPUT"
+                echo "$CMD_OUTPUT" | grep -E "$KEYWORD" >> "$TRACE_OUTPUT"
             fi
         done
     ) &
