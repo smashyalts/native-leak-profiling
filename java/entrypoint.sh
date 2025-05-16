@@ -101,12 +101,9 @@ if [ "$TRACE_ENABLED" = "true" ]; then
             sleep $INTERVAL
 
             PID=$(pgrep java)
-            kill -3 ${PID}
+            jstack ${PID} > "profiling.log"
 
-            # give it a moment to dump
-            sleep 5 
-
-            JVM_LOG="jvm.log"
+            JVM_LOG="profiling.log"
 
             if [ -f "$JVM_LOG" ]; then
                 timestamp=$(date +"%d.%m.%y-%H:%M")
@@ -118,8 +115,6 @@ if [ "$TRACE_ENABLED" = "true" ]; then
                     printf "Detected keyword ($KEYWORD):" >> "$TRACE_OUTPUT"
                     grep -E "$KEYWORD" "$JVM_LOG" >> "$TRACE_OUTPUT"
                 fi
-
-                sleep 5
 
                 rm -f "$JVM_LOG"
             fi
