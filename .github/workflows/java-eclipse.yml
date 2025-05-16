@@ -57,3 +57,5 @@ jobs:
                 file: ./java/${{ matrix.tag }}/Dockerfile
                 push: true
                 tags: ghcr.io/skullians/native-leak-profiling:java_${{ matrix.tag }}
+                cache-from: type=gha
+                cache-to: type=gha,mode=max
