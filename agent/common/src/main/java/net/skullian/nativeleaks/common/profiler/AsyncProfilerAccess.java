@@ -54,7 +54,7 @@ public class AsyncProfilerAccess {
 
     public void onLoad() {
         try {
-            profiler.execute("start,--nativemem=0,--nofree,-f,profiling.jfr,%p");
+            profiler.execute("start,nativemem,nofree,file=profiling.jfr," + pid);
         } catch (Exception e) {
             throw new RuntimeException("Failed to start data profiling.");
         }
@@ -65,7 +65,7 @@ public class AsyncProfilerAccess {
             profiler.execute("stop," + pid);
 
             new ProcessBuilder()
-                    .command("jfrconv,--total,--nativemem","--leak","profiling.jfr","leak-details.html")
+                    .command("jfrconv,total,nativemem","leak","profiling.jfr","leak-details.html")
                     .start();
         } catch (Exception e) {
             throw new RuntimeException("Failed to stop and analyse profiled data.");
