@@ -1,0 +1,5 @@
+name: Agent
+version: "${version}"
+main: net.skullian.nativeleaks.bukkit.BukkitPlatform
+api-version: "1.17"
+author: "Skullians"
