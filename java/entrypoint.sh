@@ -58,7 +58,7 @@ mkdir -p dumps
             if [ -f "$heapfile" ]; then
                 basefilename="${heapfile%.heap}"
                 
-                timestamp=$(date +"%d.%m.%y-%H:%M")
+                timestamp=$(date +"%d.%m.%y-%H:%M:%S")
                 
                 gif_output="dumps/output/${basefilename}-${timestamp}.gif"
                 
@@ -106,7 +106,7 @@ if [ "$TRACE_ENABLED" = "true" ]; then
             JVM_LOG="profiling.log"
 
             if [ -f "$JVM_LOG" ]; then
-                timestamp=$(date +"%d.%m.%y-%H:%M")
+                timestamp=$(date +"%d.%m.%y-%H:%M:%S")
                 TRACE_OUTPUT="dumps/traces/trace-${timestamp}.log"
 
                 if grep -qE "$KEYWORD" "$JVM_LOG"; then
