@@ -52,6 +52,9 @@ tasks {
             "kotlin/**",
         )
 
+        // workaround
+        relocate("one.profiler", "net.skullian.nativeleaks.lib.asyncprofiler")
+
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
         archiveFileName.set("${rootProject.name}-${project.name}-v${rootProject.version}.jar")

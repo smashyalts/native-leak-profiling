@@ -1,32 +1,45 @@
 package net.skullian.nativeleaks.bukkit;
 
 import net.skullian.nativeleaks.common.AgentPlatform;
-import net.skullian.nativeleaks.common.profiler.AsyncProfilerAccess;
+import net.skullian.nativeleaks.common.model.PluginInfo;
+import net.skullian.nativeleaks.common.profiler.LeakProfiler;
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.nio.file.Path;
 
 public class BukkitPlatform extends JavaPlugin implements AgentPlatform {
 
-    private AsyncProfilerAccess profilerAccess;
+    private LeakProfiler leakProfiler;
 
     @Override
-    public void onLoad() {
+    public void onEnable() {
         try {
-            this.profilerAccess = new AsyncProfilerAccess(this);
-            this.profilerAccess.onLoad();
+            this.leakProfiler = new LeakProfiler(this);
+            this.leakProfiler.onLoad();
         } catch (Exception e) {
-            throw new RuntimeException("Failed to initialize async-profiler.", e);
+            throw new RuntimeException("Failed to initialise LeakProfiler.", e);
         }
     }
 
     @Override
     public void onDisable() {
-        this.profilerAccess.onDisable();
+        this.leakProfiler.onDisable();
     }
 
     @Override
-    public Path dataDirectory() {
+    public Path getConfigDirectory() {
         return getDataFolder().toPath();
+    }
+
+    @Override
+    public PluginInfo getInfo(String pluginName) {
+        Plugin plugin = Bukkit.getPluginManager().getPlugin(pluginName);
+        if (plugin != null) {
+            return new PluginInfo(true, plugin.getDescription().getVersion(), plugin);
+        }
+
+        return new PluginInfo(false, null, null);
     }
 }
