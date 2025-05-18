@@ -47,7 +47,7 @@ public class LeakProfiler {
                 throw new RuntimeException("Unable to create temporary JFR file.", error);
             }
 
-            String response = this.profiler.execute("start,nativemem,jfr,file=" + this.profilerOutputPath.toString() + ",loglevel=NONE,clock=monotonic,filter");
+            String response = this.profiler.execute("start,nativemem,nofree,jfr,file=" + this.profilerOutputPath.toString() + ",loglevel=NONE,clock=monotonic,filter");
             if (!response.trim().equalsIgnoreCase("profiling started")) {
                 throw new RuntimeException("Unable to start AsyncProfiler - unexpected response given: " + response);
             } else {
