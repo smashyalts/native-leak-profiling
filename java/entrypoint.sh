@@ -41,6 +41,7 @@ java -version
 # variable format of "${VARIABLE}" before evaluating the string and automatically
 # replacing the values.
 PARSED=$(echo "${STARTUP}" | sed -e 's/{{/${/g' -e 's/}}/}/g' | eval echo "$(cat -)")
+DUMPS_ENABLED=$(echo "$PARSED" | sed -n 's/.*-Ddump=\([^ ]*\).*/\1/p')
 TRACE_ENABLED=$(echo "$PARSED" | sed -n 's/.*-Danalyse=\([^ ]*\).*/\1/p')
 
 # Display the command we're running in the output, and then execute it with the env
@@ -51,32 +52,37 @@ printf "\033[1m\033[33mcontainer@pterodactyl~ \033[0m%s\n" "$PARSED"
 mkdir -p dumps
 
 # haha we hate nohup
-(
-    while true; do
-        # loop through heapdump files
-        for heapfile in dumps/*.heap; do
-            if [ -f "$heapfile" ]; then
-                basefilename="${heapfile%.heap}"
-                
-                timestamp=$(date +"%d.%m.%y-%H:%M:%S")
-                
-                gif_output="dumps/output/${basefilename}-${timestamp}.gif"
-                
-                mkdir -p "$(dirname "$gif_output")"
-                
-                jeprof --show_bytes --maxdegree=20 --nodefraction=0 --edgefraction=0 --gif \
-                    /opt/java/openjdk/bin/java \
-                    "$heapfile" > "$gif_output"
-                
-                # Remove processed heap file
-                rm "$heapfile"
-            fi
+if [ "$DUMPS_ENABLED" = "true" ]; then
+    export LD_PRELOAD="/usr/local/lib/libjemalloc.so"
+    export MALLOC_CONF="prof:true,lg_prof_interval:31,lg_prof_sample:17,prof_prefix:/home/container/dumps/jeprof,background_thread:true,dirty_decay_ms:1000,muzzy_decay_ms:0,narenas:1,tcache_max:1024,abort_conf:true"
+
+    (
+        while true; do
+            # loop through heapdump files
+            for heapfile in dumps/*.heap; do
+                if [ -f "$heapfile" ]; then
+                    basefilename="${heapfile%.heap}"
+                    
+                    timestamp=$(date +"%d.%m.%y-%H:%M:%S")
+                    
+                    gif_output="dumps/output/${basefilename}-${timestamp}.gif"
+                    
+                    mkdir -p "$(dirname "$gif_output")"
+                    
+                    jeprof --show_bytes --maxdegree=20 --nodefraction=0 --edgefraction=0 --gif \
+                        /opt/java/openjdk/bin/java \
+                        "$heapfile" > "$gif_output"
+                    
+                    # Remove processed heap file
+                    rm "$heapfile"
+                fi
+            done
+            
+            # Wait one minute before checking again
+            sleep 60
         done
-        
-        # Wait one minute before checking again
-        sleep 60
-    done
-) &
+    ) &
+fi
 
 if [ "$TRACE_ENABLED" = "true" ]; then
     # Extract the keyword from the PARSED variable

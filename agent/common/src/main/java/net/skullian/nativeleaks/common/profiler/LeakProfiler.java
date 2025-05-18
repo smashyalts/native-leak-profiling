@@ -1,6 +1,5 @@
 package net.skullian.nativeleaks.common.profiler;
 
-import me.lucko.spark.common.util.TemporaryFiles;
 import net.skullian.nativeleaks.common.AgentPlatform;
 import net.skullian.nativeleaks.common.model.PluginInfo;
 import net.skullian.nativeleaks.common.model.Version;
@@ -10,12 +9,15 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
+import java.util.EnumSet;
 import java.util.logging.Logger;
 
 public class LeakProfiler {
 
     private final AsyncProfiler profiler = AsyncProfiler.getInstance();
-    private final TemporaryFiles temporaryFiles;
+    private final Path configDirectory;
     private final Logger logger;
     private final Path jfrConverter;
 
@@ -27,7 +29,7 @@ public class LeakProfiler {
             throw new IllegalStateException("Spark v1.10.133 or higher must be installed!");
         }
 
-        this.temporaryFiles = new TemporaryFiles(platform.getConfigDirectory().resolve("tmp"));
+        this.configDirectory = platform.getConfigDirectory();
         this.logger = platform.getLogger();
 
         this.jfrConverter = platform.getConfigDirectory().resolve("jfr-converter.jar");
@@ -42,7 +44,7 @@ public class LeakProfiler {
             logger.info("Starting profiler...");
 
             try {
-                this.profilerOutputPath = this.temporaryFiles.create("agent-", "-leak-data.jfr.tmp");
+                this.profilerOutputPath = createTemporaryFile(this.configDirectory.resolve("tmp"), "agent-", "-leak-data.jfr");
             } catch (IOException error) {
                 throw new RuntimeException("Unable to create temporary JFR file.", error);
             }
@@ -79,7 +81,7 @@ public class LeakProfiler {
             logger.info("Parsing JFR file...");
 
             ProcessBuilder processBuilder = new ProcessBuilder(
-                    "java", "-jar", jfrConverter.toString(), "--total", "--nativemem", "--leak", profilerOutputPath.toString(), "leak-results.html"
+                    "java", "-jar", jfrConverter.toString(), "--total", "--nativemem", "--leak", profilerOutputPath.toString(), configDirectory.resolve("leak-results-" + System.currentTimeMillis() + ".html").toString()
                     ).inheritIO();
 
             int exitCode = processBuilder.start().waitFor();
@@ -87,6 +89,16 @@ public class LeakProfiler {
         } catch (Exception e) {
             throw new RuntimeException("Failed to parse jfr file.", e);
         }
+    }
+
+    private Path createTemporaryFile(Path directory, String prefix, String suffix) throws IOException {
+        String name = prefix + Long.toHexString(System.nanoTime()) + suffix;
+        Path file = Files.createFile(directory.resolve(name), PosixFilePermissions.asFileAttribute(EnumSet.of(
+                PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE
+        )));
+
+        file.toFile().deleteOnExit();
+        return file;
     }
 
 }
