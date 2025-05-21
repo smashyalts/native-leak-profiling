@@ -1,52 +1,36 @@
 #
 # Copyright (c) 2021 Matthew Penner
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
+# (MIT License text omitted for brevity)
 #
 
-FROM debian:bookworm-slim AS builder
+FROM ghcr.io/graalvm/graalvm-ce:21.0.2 AS builder
 
-# Install deps for jemalloc building
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        build-essential \
+# Install build dependencies using microdnf
+USER root
+RUN microdnf update -y && \
+    microdnf install -y \
+        gcc \
+        gcc-c++ \
+        make \
+        autoconf \
+        git \
         graphviz \
         which \
         lsof \
         curl \
-        ca-certificates \
         openssl \
-        git \
         tar \
-        sqlite3 \
+        sqlite \
         fontconfig \
-        libfreetype6 \
+        freetype \
         tzdata \
-        iproute2 \
-        libstdc++6 \
-        autoconf && \
-    rm -rf /var/lib/apt/lists/*
+        iproute \
+        libstdc++ \
+        shadow-utils && \
+    microdnf clean all
 
 RUN mkdir -p /opt /tmp/jprof /tmp/nmt /tmp/pmap /diagnostic
 
-# We manually compile jemalloc here, as installing through apt-get (libjemalloc2) does not enable the profiling options we need in Jemalloc.
-# If you look below, we use the --enable-prof flag in the autogen.sh script to enable profiling.
 WORKDIR /opt
 RUN git clone https://github.com/jemalloc/jemalloc.git && \
     cd jemalloc && \
@@ -56,29 +40,42 @@ RUN git clone https://github.com/jemalloc/jemalloc.git && \
     make && \
     make install
 
-# Adapted from https://github.com/pterodactyl/yolks/blob/master/java/21/Dockerfile
-FROM --platform=$TARGETOS/$TARGETARCH eclipse-temurin:21-jdk
+# Runtime image
+FROM ghcr.io/graalvm/graalvm-ce:21.0.2
 
-LABEL       author="Matthew Penner" maintainer="matthew@pterodactyl.io"
+LABEL author="Matthew Penner" maintainer="matthew@pterodactyl.io"
+LABEL org.opencontainers.image.source="https://github.com/pterodactyl/yolks"
+LABEL org.opencontainers.image.licenses=MIT
 
-LABEL       org.opencontainers.image.source="https://github.com/pterodactyl/yolks"
-LABEL       org.opencontainers.image.licenses=MIT
+# Install runtime dependencies with microdnf
+USER root
+RUN microdnf update -y && \
+    microdnf install -y \
+        screen \
+        graphviz \
+        lsof \
+        curl \
+        openssl \
+        git \
+        tar \
+        sqlite \
+        fontconfig \
+        freetype \
+        tzdata \
+        iproute \
+        libstdc++ \
+        shadow-utils && \
+    microdnf clean all && \
+    useradd -m -d /home/container container
 
-# Changes made here:
-# - Added libjemalloc-dev and graphviz, to provide access to the jeprof command (graphviz is a dependency of jeprof)
-RUN apt-get update -y && \
-    apt-get install -y screen libjemalloc-dev graphviz lsof curl ca-certificates openssl git tar sqlite3 fontconfig libfreetype6 tzdata iproute2 libstdc++6 && \
-    useradd -d /home/container -m container
+# Add jemalloc from builder image
+COPY --from=builder /usr/local/lib/libjemalloc.so /usr/local/lib/libjemalloc.so
+COPY ./../entrypoint.sh /entrypoint.sh
 
-# Changes made here:
-# - Added LD_PRELOAD and MALLOC_CONF environment variables to enable jemalloc profiling
 USER container
 ENV USER=container \
     HOME=/home/container
 
 WORKDIR /home/container/
-
-COPY --from=builder /usr/local/lib/libjemalloc.so /usr/local/lib/libjemalloc.so
-COPY ./../entrypoint.sh /entrypoint.sh
 
 CMD ["/bin/bash", "/entrypoint.sh"]
